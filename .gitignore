@@ -1,0 +1,8 @@
+autoscan.log
+configure
+Makefile
+autom4te.cache
+config.log
+config.status
+.deps
+Makefile.in
