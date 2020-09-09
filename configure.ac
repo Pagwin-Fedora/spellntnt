@@ -13,7 +13,8 @@ AC_PROG_CC
 # Checks for libraries.
 AC_CHECK_LIB(aspell,new_aspell_config)
 # Checks for header files.
-
+AC_CHECK_HEADER(stdio.h)
+AC_CHECK_HEADER(aspell.h)
 # Checks for typedefs, structures, and compiler characteristics.
 
 # Checks for library functions.
