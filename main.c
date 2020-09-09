@@ -1,6 +1,6 @@
 #include <aspell.h>
 #include <stdio.h>
-int main(){
+int main(int argc, char* argv[]){
     //Setting up some configuration
     AspellConfig *spell_config = new_aspell_config();
     aspell_config_replace(spell_config, "lang", "en_US");
@@ -13,4 +13,5 @@ int main(){
 	puts(aspell_error_message(possible_err));
     else
 	spell_checker = to_aspell_speller(possible_err);
+
 }
