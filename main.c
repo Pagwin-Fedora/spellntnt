@@ -27,10 +27,12 @@ int main(int argc, char* argv[]){
 	puts(aspell_error_message(possible_err));
     else
 	spell_checker = to_aspell_speller(possible_err);
+    if(!aspell_checker)
+	exit(1);
     string word;
-    size_t word_size;
-    if()
-    while(word_size){
+    size_t word_size = getWord();
+    while(word_size>0){
+	
     }
 
 }
@@ -84,13 +86,16 @@ void parseCliWord(string arg){
 	if(strlen(arg)>8){
 	    correct = fopen(arg+8);
 	}
+	else{
+	    fprintf(stderr,"no filename provided to the \"correct\" cli option continuing with default(stdout)");
+	}
     }
     if(!memcmp(arg, "incorrect=",10)){
 	if(strlen(arg)>10){
-	    
+	    errors = fopen(arg+10);
 	}
 	else{
-	    fprintf(stderr,"no filename provided for spellntnt to write incorrect words too");
+	    fprintf(stderr,"no filename provided to the \"incorrect\" cli option continuing with default(stderr)");
 	}
     }
     if(!memcmp(arg, "help",4)){
@@ -101,10 +106,16 @@ void parseCliWord(string arg){
 	if(strlen(arg)>9){
 	    encoding = arg+9;
 	}
+	else{
+	    fprintf(stderr,"no encoding provided to the \"encoding\" cli option continuing with default(%s)", encoding);
+	}
     }
     if(!memcmp(arg, "lang=",5)){
 	if(strlen(arg)>5){
 	    lang = arg+5;
+	}
+	else{
+	    fprintf(stderr,"no lang provided to the \"lang\" cli option continuing with default(%s)",lang)
 	}
     }
 }
