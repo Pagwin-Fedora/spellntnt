@@ -9,10 +9,10 @@
 
 
 //types
-typdef char* string;
-typdef struct string_builder{
+typedef char* string;
+typedef struct string_builder{
     char value;
-    string_builder* next;
+    struct string_builder* next;
 } string_builder;
 
 
@@ -21,23 +21,23 @@ static void signalHandler(int);
 size_t getWord(string*);
 size_t getLine(string*);
 int checkWord(string, size_t);
-size_t unravelBuilder(string_builder, string*);
+size_t unravelBuilder(string_builder*, string*);
 void parseCliWord(string);
 int printError(string);
 int printCorrect(string);
-
+char minorParse(char);
 
 //Macros
 #define HELP_MESSAGE ""
 
 #define START_CLI			\
-    for(int argnum = 0;i<argc;i++){		\
+    for(int argnum = 0;argnum<argc;argnum++){		\
 	if(argv[argnum][0]=='-'){	\
 	    switch(argv[argnum][1]){	
 
 #define CHAR_ARG(character,action)	\
     case character:			\
-	action				\
+	action;				\
 	break
 
 #define END_CLI_ARGS }}}

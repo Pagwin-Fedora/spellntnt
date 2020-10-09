@@ -1,16 +1,21 @@
 #include "main.h"
 AspellConfig* spell_config;
-FILE* correct = stdout;
-FILE* errors = stderr;
-FILE* input = stdin;
+FILE* correct;
+FILE* errors;
+FILE* input;
+bool reparse = false;
 string lang = "en_US";
-string encoding = "UTF-8"
+string encoding = "UTF-8";
 int main(int argc, char* argv[]){
+    correct = stdout;
+    errors = stderr;
+    input = stdin;
     //parse cli args
     START_CLI
-	CHAR_ARG('-', parseCliWord(argv[argnum][2]));
+	CHAR_ARG('-', parseCliWord(argv[argnum]+2));
 	CHAR_ARG('o', errors=stdout);
 	CHAR_ARG('e', correct=stderr);
+	CHAR_ARG('r', reparse=true);
     END_CLI_ARGS
     
     //setup signal handler
@@ -27,40 +32,60 @@ int main(int argc, char* argv[]){
 	puts(aspell_error_message(possible_err));
     else
 	spell_checker = to_aspell_speller(possible_err);
-    if(!aspell_checker)
+    if(!spell_checker)
 	exit(1);
     string word;
-    size_t word_size = getWord();
+    size_t word_size = getWord(&word);
     while(word_size>0){
-	
+	int correct;
+	if(strcmp("ucs-2",encoding) || strcmp("ucs-4", encoding)){
+	    correct = aspell_speller_check_w(spell_checker,word,word_size);
+	}
+	else{
+	    correct = aspell_speller_check(spell_checker,word,word_size);
+	}
+	if(correct){
+	    printCorrect(word);
+	}
+	else{
+	    printError(word);
+	}
+	word_size = getWord(&word);
     }
 
 }
 static void signalHandler(int signal){
     //lol no reason to do anything special with any signals but I felt like adding this anyways
-    if(signal == SIGINT) exit();
-    else exit();
+    if(signal == SIGINT) exit(1);
+    else exit(1);
 }
 size_t getWord(string* loc){
-    string_builder first;
-    string_builder* current_link = &first;
-    for(char current_char = getchar();!isspace(current);current = getchar()){
-	current->value = current_char;
-	current->next = malloc(sizeof(string_builder));
+    string_builder* first = malloc(sizeof(string_builder));
+    string_builder* current_link = first;
+    for(char current_char = minorParse(getchar());!isspace(current_char);current_char = minorParse(getchar())){
+	printf("%d",!isspace(current_char));
+	current_link->value = current_char;
+	current_link->next = malloc(sizeof(string_builder));
+	if(reparse){
+	    fprintf(correct,"\n");
+	    if(correct != errors){
+		fprintf(errors,"\n");
+	    }
+	}
     }
-    free(current->next);
-    current->next = NULL;
+    free(current_link->next);
+    current_link->next = NULL;
     return unravelBuilder(first,loc);
 }
 size_t getLine(string* loc){
     string_builder* first = malloc(sizeof(string_builder));
     string_builder* current_link = first;
-    for(char current_char = getchar();current_char != '\n';current = getchar()){
-	current->value = current_char;
-	current->next = malloc(sizeof(string_builder));
+    for(char current_char = getchar();current_char != '\n';current_char = getchar()){
+	current_link->value = current_char;
+	current_link->next = malloc(sizeof(string_builder));
     }
-    free(current->next);
-    current->next = NULL;
+    free(current_link->next);
+    current_link->next = NULL;
     return unravelBuilder(first,loc);
 }
 size_t unravelBuilder(string_builder* start, string* output){
@@ -84,7 +109,7 @@ void parseCliWord(string arg){
 	return;
     if(!memcmp(arg, "correct=",8)){
 	if(strlen(arg)>8){
-	    correct = fopen(arg+8);
+	    correct = fopen(arg+8,"w+");
 	}
 	else{
 	    fprintf(stderr,"no filename provided to the \"correct\" cli option continuing with default(stdout)");
@@ -92,10 +117,15 @@ void parseCliWord(string arg){
     }
     if(!memcmp(arg, "incorrect=",10)){
 	if(strlen(arg)>10){
-	    errors = fopen(arg+10);
+	    errors = fopen(arg+10,"w+");
 	}
 	else{
 	    fprintf(stderr,"no filename provided to the \"incorrect\" cli option continuing with default(stderr)");
+	}
+    }
+    if(!memcmp(arg, "input=",6)){
+	if(strlen(arg)>6){
+	    input = fopen(arg+6,"r");
 	}
     }
     if(!memcmp(arg, "help",4)){
@@ -115,13 +145,27 @@ void parseCliWord(string arg){
 	    lang = arg+5;
 	}
 	else{
-	    fprintf(stderr,"no lang provided to the \"lang\" cli option continuing with default(%s)",lang)
+	    fprintf(stderr,"no lang provided to the \"lang\" cli option continuing with default(%s)",lang);
 	}
     }
 }
-int printError(string){
-    fprintf(errors,"\033[0;31m%s\033[0m",string);
+int printError(string message){
+    return fprintf(errors,"\033[0;31m%s\033[0m",message);
 }
-int printCorrect(string){
-    fprintf(correct,"\033[0;32m%s\033[0m",string);
+int printCorrect(string message){
+    return fprintf(correct,"\033[0;32m%s\033[0m",message);
+}
+char minorParse(char character){
+    printf("%c\t minor parse",character);
+    if(reparse){
+
+    }
+    else{
+	if(character == '\n'){
+	    fprintf(correct,"\n");
+	    if(correct != errors){
+		fprintf(errors,"\n");
+	    }
+	}
+    }
 }
