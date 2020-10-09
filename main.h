@@ -23,17 +23,21 @@ size_t getLine(string*);
 int checkWord(string, size_t);
 size_t unravelBuilder(string_builder, string*);
 void parseCliWord(string);
+int printError(string);
+int printCorrect(string);
+
 
 //Macros
+#define HELP_MESSAGE ""
+
 #define START_CLI			\
-    for(int i = 0;i<argc;i++){		\
-	if(argv[0]=='-'){	\
-	    for(size_t i = 1;argv[i]!=0){\
-		switch(argv[1]){	
+    for(int argnum = 0;i<argc;i++){		\
+	if(argv[argnum][0]=='-'){	\
+	    switch(argv[argnum][1]){	
+
 #define CHAR_ARG(character,action)	\
     case character:			\
 	action				\
 	break
-#define END_CHAR_ARGS }}}}
 
-#define END_CLI_ARGS
+#define END_CLI_ARGS }}}
