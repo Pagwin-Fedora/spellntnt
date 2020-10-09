@@ -66,3 +66,7 @@ size_t unravelBuilder(string_builder* start, string* output){
     }
     return size;
 }
+// function that processes arguments
+void parseCliWord(string arg){
+
+}
