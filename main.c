@@ -144,22 +144,31 @@ void parseCliWord(string arg){
     }
 }
 int printError(string message){
-    return fprintf(errors,"\033[0;31m%s\033[0m",message);
+    return fprintf(errors,"\033[0;31m%s\033[0m ",message);
 }
 int printCorrect(string message){
-    return fprintf(correct,"\033[0;32m%s\033[0m",message);
+    return fprintf(correct,"\033[0;32m%s\033[0m ",message);
 }
 char minorParse(char character){
     if(reparse){
-
-    }
-    else{
-	if(character == '\n'){
+	if(isspace(character)){
 	    fprintf(correct,"\n");
 	    if(correct != errors){
 		fprintf(errors,"\n");
 	    }
 	}
     }
-    return character;
+    else{
+	if(character == '\n'){
+	    fprintf(correct,"\n");
+	    if(correct != errors){
+		printf("extra newline");
+		fprintf(errors,"\n");
+	    }
+	}
+    }
+    if(!isalnum(character)){
+	fprintf(correct,"%c",character);
+    }
+    return isalnum(character) || (isspace(character) && character != '\n') ? character:' ';
 }
