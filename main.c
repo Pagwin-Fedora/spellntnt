@@ -62,8 +62,10 @@ static void signalHandler(int signal){
 size_t getWord(string* loc){
     string_builder* first = malloc(sizeof(string_builder));
     string_builder* current_link = first;
+    string_builder* last = current_link;
     for(char current_char = minorParse(getchar());!isspace(current_char);current_char = minorParse(getchar())){
-	printf("%d",!isspace(current_char));
+	last = current_link;
+	//printf("%d",!isspace(current_char));
 	current_link->value = current_char;
 	current_link->next = malloc(sizeof(string_builder));
 	if(reparse){
@@ -72,34 +74,26 @@ size_t getWord(string* loc){
 		fprintf(errors,"\n");
 	    }
 	}
+	current_link = current_link->next;
     }
-    free(current_link->next);
-    current_link->next = NULL;
-    return unravelBuilder(first,loc);
-}
-size_t getLine(string* loc){
-    string_builder* first = malloc(sizeof(string_builder));
-    string_builder* current_link = first;
-    for(char current_char = getchar();current_char != '\n';current_char = getchar()){
-	current_link->value = current_char;
-	current_link->next = malloc(sizeof(string_builder));
-    }
-    free(current_link->next);
-    current_link->next = NULL;
+    last->next = NULL;
     return unravelBuilder(first,loc);
 }
 size_t unravelBuilder(string_builder* start, string* output){
     size_t size = 0;
     string_builder* current = start;
+    string_builder* last = current;
     while(current){
 	size++;
 	current = current->next;
     }
     current = start;
-    *output = malloc(size);
+    *output = calloc(1,size);
     for(size_t i = 0;i<size;i++){
 	(*output)[i] = current->value;
-	free(current);
+	current = current->next;
+	free(last);
+	last = current;
     }
     return size;
 }
@@ -156,7 +150,6 @@ int printCorrect(string message){
     return fprintf(correct,"\033[0;32m%s\033[0m",message);
 }
 char minorParse(char character){
-    printf("%c\t minor parse",character);
     if(reparse){
 
     }
@@ -168,4 +161,5 @@ char minorParse(char character){
 	    }
 	}
     }
+    return character;
 }

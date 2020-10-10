@@ -28,7 +28,8 @@ int printCorrect(string);
 char minorParse(char);
 
 //Macros
-#define HELP_MESSAGE ""
+#define HELP_MESSAGE "--correct=[FILE]\tspecifies the file all the correct words should be written too(stdout by default)\n--incorrect=[FILE]\tspecifies the file all the incorrect words should be written too(stderr by default)\n--input=[FILE]\tspecifies the file that the program should read from to parse correct and incorrect words(stdin by default)\n--encoding=[ENCODING STRING]\tspecifies the encoding to be used(UTF-8 by default)\n--lang=[LANG STRING]\tspecifies the language to he used(en_US by default)\n\n-o\tredirects errors to stdout instead of stderr\n-e\tredirects correct spellings to stderr instead of stdout\n-r\tenables reparsing which splits every word into it's own line, removes coloring and prefixes the correct words with [C] and the erroneous words with [E]"
+#define USAGE_MESSAGE "spellntnt -[oer] --correct=[FILE] --incorrect=[FILE] --input=[FILE] --encoding=[ENCODING STRING] --lang=[LANG STRING]"
 
 #define START_CLI			\
     for(int argnum = 0;argnum<argc;argnum++){		\
