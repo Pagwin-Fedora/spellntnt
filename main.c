@@ -4,6 +4,7 @@ FILE* correct;
 FILE* errors;
 FILE* input;
 bool reparse = false;
+bool single = false;
 string lang = "en_US";
 string encoding = "UTF-8";
 int main(int argc, char* argv[]){
@@ -16,6 +17,7 @@ int main(int argc, char* argv[]){
 	CHAR_ARG('o', errors=stdout);
 	CHAR_ARG('e', correct=stderr);
 	CHAR_ARG('r', reparse=true);
+	CHAR_ARG('s',single=false);
     END_CLI_ARGS
     
     //setup signal handler
@@ -153,7 +155,7 @@ char minorParse(char character){
     if(reparse){
 	if(isspace(character)){
 	    fprintf(correct,"\n");
-	    if(correct != errors){
+	    if(correct != errors && !single){
 		fprintf(errors,"\n");
 	    }
 	}
