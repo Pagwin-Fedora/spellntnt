@@ -1,23 +1,16 @@
 #include "main.h"
 AspellConfig* spell_config;
-FILE* correct;
-FILE* errors;
+FILE* output;
 FILE* input;
-bool reparse = false;
-bool single = false;
+bool outChanged = false;
 string lang = "en_US";
 string encoding = "UTF-8";
 int main(int argc, char* argv[]){
-    correct = stdout;
-    errors = stderr;
+    output = stdout;
     input = stdin;
     //parse cli args
     START_CLI
 	CHAR_ARG('-', parseCliWord(argv[argnum]+2));
-	CHAR_ARG('o', errors=stdout);
-	CHAR_ARG('e', correct=stderr);
-	CHAR_ARG('r', reparse=true);
-	CHAR_ARG('s',single=false);
     END_CLI_ARGS
     
     //setup signal handler
@@ -36,6 +29,8 @@ int main(int argc, char* argv[]){
 	spell_checker = to_aspell_speller(possible_err);
     if(!spell_checker)
 	exit(1);
+
+    //checking spelling of words
     string word;
     size_t word_size = getWord(&word);
     while(word_size>0){
@@ -46,12 +41,8 @@ int main(int argc, char* argv[]){
 	else{
 	    correct = aspell_speller_check(spell_checker,word,word_size);
 	}
-	if(correct){
-	    printCorrect(word);
-	}
-	else{
-	    printError(word);
-	}
+	if(correct) printCorrect(word);
+	else printError(word);
 	word_size = getWord(&word);
     }
 
@@ -63,26 +54,27 @@ static void signalHandler(int signal){
 }
 size_t getWord(string* loc){
     string_builder* first = malloc(sizeof(string_builder));
+    first->value = EOF;
+    first->next = NULL;
     string_builder* current_link = first;
     string_builder* last = current_link;
-    for(char current_char = minorParse(getchar());!isspace(current_char);current_char = minorParse(getchar())){
+    int current_char = fgetc(input);
+    while(!isspace(current_char)&&current_char!=EOF){
 	last = current_link;
 	//printf("%d",!isspace(current_char));
 	current_link->value = current_char;
 	current_link->next = malloc(sizeof(string_builder));
-	if(reparse){
-	    fprintf(correct,"\n");
-	    if(correct != errors){
-		fprintf(errors,"\n");
-	    }
-	}
 	current_link = current_link->next;
+	current_char = fgetc(input);
     }
     last->next = NULL;
-    return unravelBuilder(first,loc);
+    size_t temp =  unravelBuilder(first,loc);
+    //fprintf(stderr,"%lu\n",temp);
+    return temp;
 }
 size_t unravelBuilder(string_builder* start, string* output){
     size_t size = 0;
+    bool notEOF = start->value !=EOF;
     string_builder* current = start;
     string_builder* last = current;
     while(current){
@@ -97,26 +89,19 @@ size_t unravelBuilder(string_builder* start, string* output){
 	free(last);
 	last = current;
     }
-    return size;
+    return notEOF?size:0;
 }
 // function that processes arguments
 void parseCliWord(string arg){
     if(*arg == 0 || arg == NULL)
 	return;
-    if(!memcmp(arg, "correct=",8)){
-	if(strlen(arg)>8){
-	    correct = fopen(arg+8,"w+");
+    if(!memcmp(arg, "output=",7)){
+	outChanged = true;
+	if(strlen(arg)>7){
+	    output = fopen(arg+7,"w+");
 	}
 	else{
 	    fprintf(stderr,"no filename provided to the \"correct\" cli option continuing with default(stdout)");
-	}
-    }
-    if(!memcmp(arg, "incorrect=",10)){
-	if(strlen(arg)>10){
-	    errors = fopen(arg+10,"w+");
-	}
-	else{
-	    fprintf(stderr,"no filename provided to the \"incorrect\" cli option continuing with default(stderr)");
 	}
     }
     if(!memcmp(arg, "input=",6)){
@@ -146,31 +131,12 @@ void parseCliWord(string arg){
     }
 }
 int printError(string message){
-    return fprintf(errors,"\033[0;31m%s\033[0m ",message);
+    //nope we're doing this differently now
+//    return fprintf(errors,"\033[0;31m%s\033[0m ",message);
+    return fprintf(output,"%sError: %s%s\n",!outChanged?"\033[0;31m":"",message,!outChanged?"\033[0m":"");
 }
 int printCorrect(string message){
-    return fprintf(correct,"\033[0;32m%s\033[0m ",message);
-}
-char minorParse(char character){
-    if(reparse){
-	if(isspace(character)){
-	    fprintf(correct,"\n");
-	    if(correct != errors && !single){
-		fprintf(errors,"\n");
-	    }
-	}
-    }
-    else{
-	if(character == '\n'){
-	    fprintf(correct,"\n");
-	    if(correct != errors){
-		printf("extra newline");
-		fprintf(errors,"\n");
-	    }
-	}
-    }
-    if(!isalnum(character)){
-	fprintf(correct,"%c",character);
-    }
-    return isalnum(character) || (isspace(character) && character != '\n') ? character:' ';
+    //nope we're redoing this
+//    return fprintf(correct,"\033[0;32m%s\033[0m ",message);
+    return fprintf(output,"%sCorrect: %s%s\n",!outChanged?"\033[0;32m":"",message,!outChanged?"\033[0m":"");
 }

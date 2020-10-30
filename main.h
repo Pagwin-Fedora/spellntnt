@@ -11,7 +11,7 @@
 //types
 typedef char* string;
 typedef struct string_builder{
-    char value;
+    int value;
     struct string_builder* next;
 } string_builder;
 
@@ -28,8 +28,8 @@ int printCorrect(string);
 char minorParse(char);
 
 //Macros
-#define HELP_MESSAGE "--correct=[FILE]\tspecifies the file all the correct words should be written too(stdout by default)\n--incorrect=[FILE]\tspecifies the file all the incorrect words should be written too(stderr by default)\n--input=[FILE]\tspecifies the file that the program should read from to parse correct and incorrect words(stdin by default)\n--encoding=[ENCODING STRING]\tspecifies the encoding to be used(UTF-8 by default)\n--lang=[LANG STRING]\tspecifies the language to he used(en_US by default)\n\n-o\tredirects errors to stdout instead of stderr\n-e\tredirects correct spellings to stderr instead of stdout\n-r\tenables reparsing which splits every word into it's own line, removes coloring and prefixes the correct words with [C] and the erroneous words with [E]\n-s\twill output everything to the filestream used for correct words, should be used when interfacing with the program directly to avoid weird spacing/out of order chars and other visual issues(if the --incorrect cli option is used with this it will be ignored)"
-#define USAGE_MESSAGE "spellntnt -[oers] --correct=[FILE] --incorrect=[FILE] --input=[FILE] --encoding=[ENCODING STRING] --lang=[LANG STRING]"
+#define HELP_MESSAGE "--output=[FILE]\t\t\tspecifies the output file(stdout by default)\n--input=[FILE]\t\t\tspecifies the input file(stdin by default)\n--encoding=[ENCODING STRING]\tspecifies the encoding to be used(UTF-8 by default)\n--lang=[LANG STRING]\t\tspecifies the language to he used(en_US by default)\n"
+#define USAGE_MESSAGE "spellntnt [OPTIONS]"
 
 #define START_CLI			\
     for(int argnum = 0;argnum<argc;argnum++){		\
